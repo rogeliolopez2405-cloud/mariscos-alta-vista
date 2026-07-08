@@ -15,8 +15,9 @@ export async function getOrders(): Promise<Order[]> {
   const kv = await getKV();
   const raw = await kv.get(ORDERS_KEY);
   const orders: Order[] = raw ? JSON.parse(raw) : [];
+  // Oldest first (FIFO), so the dashboard shows the oldest ticket first.
   return orders.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
   );
 }
 
