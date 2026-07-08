@@ -1,6 +1,6 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "mariscos-alta-vista",
+	"name": "mariscos-alta-vista-app",
 	"main": ".open-next/worker.js",
 	"compatibility_date": "2026-07-07",
 	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -12,7 +12,7 @@
 		{
 			// Self-reference service binding, required by @opennextjs/cloudflare
 			"binding": "WORKER_SELF_REFERENCE",
-			"service": "mariscos-alta-vista"
+			"service": "mariscos-alta-vista-app"
 		}
 	]
 }
