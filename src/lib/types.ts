@@ -23,6 +23,7 @@ export interface Order {
   createdAt: string;
   customerName: string;
   customerPhone: string;
+  customerEmail?: string;
   items: CartItem[];
   total: number;
   pickupDate: string;

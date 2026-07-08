@@ -12,6 +12,7 @@ export async function GET() {
 interface CreateOrderBody {
   customerName: string;
   customerPhone: string;
+  customerEmail?: string;
   items: { menuItemId: string; quantity: number }[];
   pickupDate: string;
   pickupTime: string;
@@ -53,6 +54,7 @@ export async function POST(request: NextRequest) {
     createdAt: new Date().toISOString(),
     customerName: body.customerName.trim(),
     customerPhone: body.customerPhone.trim(),
+    customerEmail: body.customerEmail?.trim() || undefined,
     items,
     total,
     pickupDate: body.pickupDate,

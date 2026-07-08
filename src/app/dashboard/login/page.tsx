@@ -32,13 +32,14 @@ export default function DashboardLoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6">
+    <main className="min-h-screen flex items-center justify-center p-6 bg-charcoal">
       <form
         onSubmit={handleSubmit}
-        className="max-w-sm w-full bg-white rounded-2xl shadow-lg p-8 border border-maroon/10"
+        className="max-w-sm w-full bg-white rounded-2xl shadow-lg p-8 border border-gold/30"
       >
-        <h1 className="text-xl font-bold text-maroon mb-1">Mariscos Alta Vista</h1>
-        <p className="text-sm text-foreground/60 mb-6">Owner dashboard</p>
+        <p className="text-xs tracking-[0.3em] uppercase text-gold mb-2">Owner Access</p>
+        <h1 className="font-serif text-2xl text-maroon mb-1">Mariscos Alta Vista</h1>
+        <div className="w-10 h-px bg-gold my-3" />
         <label className="block text-sm font-semibold mb-1">Passcode</label>
         <input
           type="password"
@@ -51,7 +52,7 @@ export default function DashboardLoginPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full bg-maroon text-white py-3 rounded-full font-semibold disabled:opacity-50"
+          className="w-full bg-maroon text-white py-3 rounded-full font-semibold tracking-wide disabled:opacity-50"
         >
           {submitting ? "Checking..." : "Log in"}
         </button>

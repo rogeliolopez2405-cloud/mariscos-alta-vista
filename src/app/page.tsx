@@ -44,6 +44,7 @@ export default function OrderPage() {
 
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
   const [pickupDate, setPickupDate] = useState(todayISO());
   const [pickupTime, setPickupTime] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pay_at_pickup");
@@ -108,6 +109,7 @@ export default function OrderPage() {
         body: JSON.stringify({
           customerName,
           customerPhone,
+          customerEmail: customerEmail.trim() || undefined,
           pickupDate,
           pickupTime,
           paymentMethod,
@@ -136,21 +138,22 @@ export default function OrderPage() {
   if (confirmedOrderId) {
     return (
       <main className="min-h-screen flex items-center justify-center p-6">
-        <div className="max-w-md w-full text-center bg-white rounded-2xl shadow-lg p-8 border border-maroon/10">
+        <div className="max-w-md w-full text-center bg-white rounded-2xl shadow-lg p-10 border border-gold/30">
           <div className="text-5xl mb-4">🦐</div>
-          <h1 className="text-2xl font-bold text-maroon mb-2">
-            Order received!
+          <div className="w-10 h-px bg-gold mx-auto mb-4" />
+          <h1 className="font-serif text-3xl text-maroon mb-3">
+            Order received
           </h1>
           <p className="text-foreground/80 mb-6">
             {paymentMethod === "pay_online"
               ? "Online payments are launching soon — we'll confirm your order and you can pay when you pick it up."
               : "We'll see you at pickup. Pay in person with cash or card."}
           </p>
-          <p className="text-sm text-foreground/50 mb-6">
+          <p className="text-xs tracking-widest uppercase text-foreground/40 mb-6">
             Order #{confirmedOrderId.slice(0, 8)}
           </p>
           <button
-            className="bg-maroon text-white px-6 py-3 rounded-full font-semibold hover:bg-maroon-dark transition"
+            className="bg-maroon text-white px-6 py-3 rounded-full font-semibold tracking-wide hover:bg-maroon-dark transition"
             onClick={() => setConfirmedOrderId(null)}
           >
             Place another order
@@ -162,34 +165,45 @@ export default function OrderPage() {
 
   return (
     <main className="min-h-screen pb-28">
-      <header className="relative bg-maroon text-white text-center overflow-hidden">
+      <header className="relative bg-charcoal text-white text-center overflow-hidden">
         <Image
           src="/promo/seafood-weekend.jpg"
           alt="Mariscos Alta Vista — shrimp ceviche and shrimp cocktail"
           width={900}
           height={1035}
           priority
-          className="w-full max-h-72 object-cover object-top opacity-90"
+          className="w-full max-h-72 object-cover object-top opacity-80"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-maroon via-maroon/10 to-transparent" />
-        <div className="relative py-4 px-4">
-          <h1 className="text-3xl font-bold tracking-wide">MARISCOS ALTA VISTA</h1>
-          <p className="mt-1 opacity-90">📍 Paramount, CA · Order ahead for pickup</p>
+        <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/40 to-black/10" />
+        <div className="relative py-8 px-4">
+          <p className="text-xs tracking-[0.3em] uppercase text-gold-light mb-2">
+            Est. Paramount, California
+          </p>
+          <h1 className="font-serif text-4xl sm:text-5xl tracking-wide">
+            Mariscos Alta Vista
+          </h1>
+          <div className="w-14 h-px bg-gold mx-auto my-3" />
+          <p className="text-sm tracking-wide text-white/80">
+            Fine coastal Mexican seafood · Order ahead for pickup
+          </p>
         </div>
       </header>
 
       <div className="max-w-2xl mx-auto px-4 py-6">
         {CATEGORY_ORDER.filter((cat) => itemsByCategory[cat]?.length).map(
           (category) => (
-            <section key={category} className="mb-8">
-              <h2 className="text-xl font-bold text-maroon mb-3">{category}</h2>
+            <section key={category} className="mb-10">
+              <div className="flex items-center gap-3 mb-4">
+                <h2 className="font-serif text-2xl text-maroon">{category}</h2>
+                <div className="flex-1 h-px bg-gold/40" />
+              </div>
               <div className="space-y-3">
                 {itemsByCategory[category].map((item) => {
                   const qty = cart[item.id] || 0;
                   return (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between bg-white rounded-xl p-4 shadow-sm border border-maroon/10"
+                      className="flex items-center justify-between bg-white rounded-xl p-4 shadow-sm border border-gold/20"
                     >
                       <div className="pr-3">
                         <p className="font-semibold">{item.name}</p>
@@ -242,7 +256,7 @@ export default function OrderPage() {
         <div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50">
           <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[90vh] overflow-y-auto p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-maroon">Your order</h2>
+              <h2 className="font-serif text-2xl text-maroon">Your order</h2>
               <button onClick={() => setCartOpen(false)} className="text-2xl leading-none">
                 &times;
               </button>
@@ -281,6 +295,18 @@ export default function OrderPage() {
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
                   required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-1">
+                  Email (optional)
+                </label>
+                <input
+                  type="email"
+                  className="w-full border rounded-lg px-3 py-2"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  placeholder="For special offers — optional"
                 />
               </div>
               <div className="flex gap-3">

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Order, OrderStatus } from "@/lib/types";
 
@@ -62,14 +63,23 @@ export default function DashboardClient() {
 
   return (
     <main className="min-h-screen p-4 sm:p-8 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-maroon">Orders — Mariscos Alta Vista</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+        <h1 className="font-serif text-2xl text-maroon">Orders — Mariscos Alta Vista</h1>
         <button
           onClick={loadOrders}
           className="text-sm border border-maroon text-maroon rounded-full px-4 py-2 font-semibold"
         >
           Refresh
         </button>
+      </div>
+
+      <div className="flex gap-4 mb-6 text-sm">
+        <Link href="/dashboard/promo" className="text-maroon font-semibold underline">
+          Send a promo
+        </Link>
+        <Link href="/dashboard/qr-code" className="text-maroon font-semibold underline">
+          QR code
+        </Link>
       </div>
 
       {loading && <p>Loading orders...</p>}
