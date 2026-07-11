@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import DashboardShell from "../DashboardShell";
 import { Order } from "@/lib/types";
 
 const DEFAULT_MESSAGE =
@@ -54,12 +54,9 @@ export default function PromoClient() {
   }
 
   return (
+    <DashboardShell>
     <main className="min-h-screen p-4 sm:p-8 max-w-lg mx-auto pb-16">
-      <Link href="/dashboard" className="text-sm text-maroon font-semibold">
-        ← Back to orders
-      </Link>
-
-      <h1 className="font-serif text-2xl text-maroon mt-4 mb-1">Send a promo</h1>
+      <h1 className="font-serif text-2xl text-maroon mb-1">Send a promo</h1>
       <p className="text-sm text-foreground/60 mb-6">
         Write your message, then send it to everyone who's ordered before.
       </p>
@@ -153,5 +150,6 @@ export default function PromoClient() {
         </div>
       )}
     </main>
+    </DashboardShell>
   );
 }

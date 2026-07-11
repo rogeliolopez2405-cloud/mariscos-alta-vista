@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
+import DashboardShell from "../DashboardShell";
 
 export default function QrCodeClient() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -21,13 +21,8 @@ export default function QrCodeClient() {
   }, []);
 
   return (
+    <DashboardShell>
     <main className="min-h-screen p-4 sm:p-8 max-w-lg mx-auto">
-      <div className="flex items-center justify-between mb-6 print:hidden">
-        <Link href="/dashboard" className="text-sm text-maroon font-semibold">
-          ← Back to orders
-        </Link>
-      </div>
-
       <div className="bg-white rounded-2xl shadow-sm border border-gold/20 p-8 text-center">
         <p className="text-xs tracking-[0.3em] uppercase text-gold mb-2">
           Scan to order
@@ -48,5 +43,6 @@ export default function QrCodeClient() {
         to order.
       </p>
     </main>
+    </DashboardShell>
   );
 }
