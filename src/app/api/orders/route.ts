@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
+import * as Sentry from "@sentry/cloudflare";
 import { addOrder, getOrders } from "@/lib/orderStore";
 import { notifyNewOrder } from "@/lib/notify";
 import { MENU } from "@/lib/menu";
 import { CartItem, Order, PaymentMethod } from "@/lib/types";
 
 export async function GET() {
-  const orders = await getOrders();
-  return NextResponse.json({ orders });
+  try {
+    const orders = await getOrders();
+    return NextResponse.json({ orders });
+  } catch (error) {
+    Sentry.captureException(error);
+    return NextResponse.json(
+      { error: "Something went wrong loading orders. Please try again." },
+      { status: 500 }
+    );
+  }
 }
 
 interface CreateOrderBody {
@@ -21,7 +30,15 @@ interface CreateOrderBody {
 }
 
 export async function POST(request: NextRequest) {
-  const body = (await request.json()) as CreateOrderBody;
+  let body: CreateOrderBody;
+  try {
+    body = (await request.json()) as CreateOrderBody;
+  } catch {
+    return NextResponse.json(
+      { error: "We couldn't read your order. Please try again." },
+      { status: 400 }
+    );
+  }
 
   if (
     !body.customerName?.trim() ||
@@ -36,16 +53,22 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const items: CartItem[] = body.items.map((line) => {
+  const items: CartItem[] = [];
+  for (const line of body.items) {
     const menuItem = MENU.find((m) => m.id === line.menuItemId);
-    if (!menuItem) throw new Error(`Unknown menu item: ${line.menuItemId}`);
-    return {
+    if (!menuItem) {
+      return NextResponse.json(
+        { error: `That item isn't on the menu anymore. Please refresh and try again.` },
+        { status: 400 }
+      );
+    }
+    items.push({
       menuItemId: menuItem.id,
       name: menuItem.name,
       price: menuItem.price,
       quantity: line.quantity,
-    };
-  });
+    });
+  }
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -64,8 +87,16 @@ export async function POST(request: NextRequest) {
     status: "new",
   };
 
-  await addOrder(order);
-  await notifyNewOrder(order);
+  try {
+    await addOrder(order);
+    await notifyNewOrder(order);
+  } catch (error) {
+    Sentry.captureException(error);
+    return NextResponse.json(
+      { error: "Something went wrong saving your order. Please try again." },
+      { status: 500 }
+    );
+  }
 
   return NextResponse.json({ order }, { status: 201 });
 }
