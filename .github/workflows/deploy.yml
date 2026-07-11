@@ -6,7 +6,71 @@ on:
   workflow_dispatch: {}
 
 jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Build for Cloudflare
+        run: npm run cf:build
+
+      - name: Start local Worker
+        run: npx wrangler dev --port 8787 &
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Wait for local Worker to be ready
+        run: |
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8787 || true)
+            if [ "$code" = "200" ]; then
+              echo "Worker is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Worker never became ready"
+          exit 1
+
+      - name: Smoke test - homepage loads
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8787)
+          if [ "$code" != "200" ]; then echo "Homepage returned $code"; exit 1; fi
+
+      - name: Smoke test - place a test order
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X POST http://localhost:8787/api/orders \
+            -H "Content-Type: application/json" \
+            -d '{"customerName":"CI Smoke Test","customerPhone":"+15551234567","pickupDate":"2026-01-01","pickupTime":"12:00 PM","paymentMethod":"pay_at_pickup","items":[{"menuItemId":"taco-carne-asada","quantity":1}]}')
+          code=$(echo "$response" | tail -1)
+          body=$(echo "$response" | sed '$d')
+          if [ "$code" != "201" ]; then echo "Order creation returned $code: $body"; exit 1; fi
+          echo "$body" | grep -q '"order"' || { echo "Response missing order object: $body"; exit 1; }
+
+      - name: Smoke test - orders list reflects the test order
+        run: |
+          response=$(curl -s http://localhost:8787/api/orders)
+          echo "$response" | grep -q "CI Smoke Test" || { echo "Test order not found in list: $response"; exit 1; }
+
+      - name: Smoke test - dashboard login
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8787/api/dashboard-auth \
+            -H "Content-Type: application/json" -d '{"passcode":"mariscos2026"}')
+          if [ "$code" != "200" ]; then echo "Dashboard login returned $code"; exit 1; fi
+
   deploy:
+    needs: smoke-test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
