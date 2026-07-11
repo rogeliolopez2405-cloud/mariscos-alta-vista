@@ -1,4 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { mkdir, readFile, writeFile } from "fs/promises";
+import path from "path";
 import { Order, OrderStatus } from "./types";
 
 // Orders are stored as a single JSON blob in Cloudflare KV. Fine for a
@@ -6,9 +8,41 @@ import { Order, OrderStatus } from "./types";
 // before this handles serious traffic.
 const ORDERS_KEY = "orders";
 
-async function getKV() {
-  const { env } = await getCloudflareContext({ async: true });
-  return env.ORDERS_KV;
+// `next dev` can't reach the real Cloudflare KV binding on this machine
+// (workerd has no win32/arm64 build), so fall back to a local JSON file
+// for local testing. Production (Cloudflare Workers) always uses real KV.
+const LOCAL_STORE_PATH = path.join(process.cwd(), "data", "orders.local.json");
+
+interface KVLike {
+  get(key: string): Promise<string | null>;
+  put(key: string, value: string): Promise<void>;
+}
+
+function localFileKV(): KVLike {
+  return {
+    async get(key: string) {
+      if (key !== ORDERS_KEY) return null;
+      try {
+        return await readFile(LOCAL_STORE_PATH, "utf-8");
+      } catch {
+        return null;
+      }
+    },
+    async put(key: string, value: string) {
+      if (key !== ORDERS_KEY) return;
+      await mkdir(path.dirname(LOCAL_STORE_PATH), { recursive: true });
+      await writeFile(LOCAL_STORE_PATH, value, "utf-8");
+    },
+  };
+}
+
+async function getKV(): Promise<KVLike> {
+  try {
+    const { env } = await getCloudflareContext({ async: true });
+    return env.ORDERS_KV;
+  } catch {
+    return localFileKV();
+  }
 }
 
 export async function getOrders(): Promise<Order[]> {
