@@ -374,6 +374,16 @@ export default function OrderPage() {
         </div>
       </header>
 
+      <section className="max-w-2xl mx-auto px-4 pt-6">
+        <Image
+          src="/promo/seafood-weekend-7-25.jpg"
+          alt="Seafood Weekend — This Saturday 7/25 only! Ceviche and cóctel de camarón. Call or text +1 (562) 533-5708."
+          width={1200}
+          height={960}
+          className="w-full rounded-2xl border border-gold/20 shadow-md"
+        />
+      </section>
+
       <div className="max-w-6xl mx-auto px-4 py-6 lg:flex lg:gap-8 lg:items-start">
         <div ref={menuRef} className="lg:flex-1 max-w-2xl mx-auto lg:mx-0">
           {CATEGORY_ORDER.filter((cat) => itemsByCategory[cat]?.length).map(
